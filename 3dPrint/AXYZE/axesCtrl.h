@@ -30,8 +30,8 @@
 
 //#include "tmr.h"
 
-#define STEP_MM		0.2 // 1 step = 0.2 mm 
-#define TOLL_MM		0.5
+#define STEP_MM		0.01 // 1 step = 0.2 mm 
+#define TOLL_MM		0.01
 
 typedef struct {
 	float	axeX;

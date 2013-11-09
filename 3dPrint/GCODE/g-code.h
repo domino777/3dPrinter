@@ -40,6 +40,7 @@ typedef struct {
 	float valExtr[4];			//	Extra argument of cmdTyoe, like G4 P2000 - '2000' is the value
 } GCODE_PARSED;
 
+#define NULL_f		0.0
 #define NULL		0
 
 GCODE_PARSED	gCode_parsing(char* str);

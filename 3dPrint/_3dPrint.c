@@ -44,18 +44,18 @@ char printFromString( char* strCmd ) {
 	spAxes.axeE	=	gCodeVar.valE;
 
 	
-	/*if ( gCodeVar.cmdType == 'G' ) {
-		if ( gCodeVar.cmdType == 1 ) {
-			if ( gCodeVar.valE != 0.0 && gCodeVar.valX != 0.0 && gCodeVar.valY != 0.0 && gCodeVar.valZ != 0.0 )
+	if ( gCodeVar.cmdType == 'G' ) {
+		if ( gCodeVar.cmdVal == 1 ) {
+		//	if ( gCodeVar.valE != 0.0 && gCodeVar.valX != 0.0 && gCodeVar.valY != 0.0 && gCodeVar.valZ != 0.0 )
 				//extrudeStart( &absAxeAxtualPos, &gCodeVar.valE, &prevF, &prevF );
-				;
-			else {*/
-				char tt = axesWorkStart( &absAxeAxtualPos, &spAxes, &gCodeVar.valF, &prevF, ( gCodeVar.valE == 0.0 ) );
-	/*		}			
+				//;
+			//else {
+				axesWorkStart( &absAxeAxtualPos, &spAxes, &gCodeVar.valF, &prevF, ( gCodeVar.valE == 0.0 ) );
 		}	
-	}	*/
+	}	
 	//	update previous speed parameter		
 	if ( gCodeVar.valF != 0.0 && gCodeVar.valF != prevF )
-		gCodeVar.valF != prevF;
+		 prevF = gCodeVar.valF;
+		 
 	return 0x01;		//	command string completed
 }

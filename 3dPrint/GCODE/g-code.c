@@ -33,7 +33,7 @@
 #include "STRING/string_hdl.h"
 #include "LCD/graphic.h"
 
-#define ASCII_RANGE	( ( str[i] >= 48 && str[i] <= 57 ) || ( str[i] >= 65 && str[i] <= 90 ) || ( str[i] >= 97 && str[i] <= 122 ) || str[i] == 32 || str[i] == 44 || str[i] == 46 )
+#define ASCII_RANGE	( ( str[i] >= 48 && str[i] <= 57 ) || ( str[i] >= 65 && str[i] <= 90 ) || ( str[i] >= 97 && str[i] <= 122 ) || str[i] == 32 || str[i] == 44 || str[i] == 46 || str[i] == 45 )
 
 GCODE_PARSED gCode_parsing(char* str) {
 	
@@ -41,11 +41,11 @@ GCODE_PARSED gCode_parsing(char* str) {
 		
 	GCODE_PARSED gParsed;
 	gParsed.cmdType		=	NULL;	//	initialized to 0
-	gParsed.valX		=	NULL;
-	gParsed.valY		=	NULL;
-	gParsed.valZ		=	NULL;
-	gParsed.valE		=	NULL;
-	gParsed.valF		=	NULL;
+	gParsed.valX		=	NULL_f;
+	gParsed.valY		=	NULL_f;
+	gParsed.valZ		=	NULL_f;
+	gParsed.valE		=	NULL_f;
+	gParsed.valF		=	NULL_f;
 	
 	int xtraPar = 0;
 	
@@ -102,7 +102,9 @@ GCODE_PARSED gCode_parsing(char* str) {
 				gParsed.valF = string_to_float ( strVal );
 			break;
 
-			default:
+			case 'P':
+			case 'T':
+			case 'R':
 				strVal[0] = 0x00;
 				gParsed.cmdExtr[xtraPar] = str[i];
 				i++;
@@ -110,10 +112,9 @@ GCODE_PARSED gCode_parsing(char* str) {
 					charToStrConcat( strVal, str[i] );
 				gParsed.valExtr[xtraPar] = string_to_float( strVal );
 				xtraPar++;
-				if (xtraPar > 4) return gParsed;
+				if (xtraPar > 4) { return gParsed; }
 			break;
 		}
 	}
-		
 	return gParsed;
 }

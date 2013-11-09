@@ -118,13 +118,13 @@ long string_to_long(char *str)
 
 float string_to_float(char *str) {
 	float valOut = 0.0;
-	int invert = 0;
+	float invert = 1.0;
 	int pDec = 0;
 	
 	int i = 0;
 	for( i = 0; str[i] != NULL; i++) {
-		if ( str[i] == 0x2D )
-			invert = 1;
+		if ( str[i] == '-' )
+			invert = -1.0;
 		else if ( str[i] == '.' || str[i] == ',')
 			pDec = i;
 		else {
@@ -136,6 +136,6 @@ float string_to_float(char *str) {
 	float pDecPos = 1.0;
 	for( int j = 0; j < ( i - pDec - 1) && pDec != 0; j++ )
 		pDecPos	*=	10.0;
-		
-	return ( valOut	/ pDecPos );
+	
+	return ( valOut	/ pDecPos * invert );
 }

@@ -84,7 +84,7 @@ char axesWorkStart( AXES* absAXES, AXES* spAXES, float* exeSpeed, float* prevExe
 	unsigned int timerTotal	= 0;
 	
 	//	Start movement of the 3 axes
-	while ( !axeEend || !axeYend || !axeZend || !axeEend ) {
+	while ( axeXend == 0/*|| !axeYend || !axeZend || !axeEend */) {
 		
 		TCC0_CTRLFSET = 0x08;										//	Reset timer counter
 		unsigned int cycle = (unsigned int)( timerTotal * 0.0625 );		//	Computing cpuCycle
@@ -105,6 +105,10 @@ char axeXCtr( AXES* absAXES, float* spAXE, unsigned long* msStep, unsigned int* 
 	if ( *cpuCycle == 0 )
 		return 0;
 		
+		//	Movement completed
+	if ( ( absAXES->axeX - TOLL_MM ) <= *spAXE  && ( absAXES->axeX + TOLL_MM ) >= *spAXE )
+		return 1;
+		
 	char tmrEnd = delay_us( 1, msStep, &axeXcounter, *cpuCycle );
 	if ( !tmrEnd )
 		return 0;
@@ -121,15 +125,13 @@ char axeXCtr( AXES* absAXES, float* spAXE, unsigned long* msStep, unsigned int* 
 		axeXcStep--;
 		absAXES->axeX	-=	STEP_MM;
 		if ( axeXcStep < 0 )
-			axeXcStep = 0;
+			axeXcStep = 4;
 	}
 	
-	PORTA_OUT |= step[axeXcStep];
+	PORTA_OUT = step[axeXcStep] | ( 0x08 & PORTA_OUT );
 
 //	Reset counter
 	axeXcounter = 0;
-	
-//	Movement completed
-	if ( absAXES->axeX > *spAXE - TOLL_MM && absAXES->axeX < *spAXE + TOLL_MM )
-		return 1;
+		
+	return 0;
 }

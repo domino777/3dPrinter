@@ -58,6 +58,7 @@ int main (void)
 	write_logo_fs(load_logo);
 	_delay_ms(1000);
 	
+	PORTA_DIR |= 0xC0;
 //	SD CARD INITIALIZATION
 	initSPI();						//	Init SPI interface
 	while( 1 ) {				//	Re-try SD card init
@@ -389,6 +390,11 @@ int main (void)
 }
 
 void gCodeFile( DIR* file ) {
+	char retVal;
+	char line[128];
+	FILE_HNDL	fHNDL;
+	fHNDL.inode_id	=	file->inode_id;
+	fHNDL.last_byte =	0;
 	
 	lcd_cleaning();
 	while ( 1 ) {
@@ -400,7 +406,12 @@ void gCodeFile( DIR* file ) {
 			lcd_cleaning();
 		}
 		else if ( pulse( !(PORTF_IN & 0x04) , &mSw2) ) {
-			printFromString("G1 X5.2 Y6.5 Z1.4 F295.6 E2.19");
+				while ( retVal != EOF ) {
+					retVal = EXT_readfile( &fHNDL, &line);
+					write_txt(&line, 0, 3, 0);
+					printFromString(&line);
+				}
+				write_txt("Fine stampa", 0, 3, 0);
 		}		
 	}
 }
