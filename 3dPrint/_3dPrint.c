@@ -28,6 +28,7 @@
 #include "3dPrint/GCODE/g-code.h"
 #include "3dPrint/AXYZE/axesCtrl.h"
 
+
 char printFromString( char* strCmd ) {
 
 //	Parsing the string command to G-Code var type

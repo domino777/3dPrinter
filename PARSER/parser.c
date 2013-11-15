@@ -42,19 +42,23 @@ void long_to_string(unsigned long _value, char *_str)
 	
 	_value_aux	=	_value;
 	
-	do
-	{
-		_q_result	= _value_aux / _div;
-		if(_q_result >= 1 || _f_digit || _div == 1)
+	if ( _value != 0 )
+		do
 		{
-			_value_aux		= _value_aux - (_q_result * _div);
-			_f_digit	=	true;
-			_str[_char_p]	=	_q_result + 0x30;
-			_str[_char_p + 1]	=	0x00;
-			_char_p++;
-		}
-		_div = _div / 10;
-	} while (_div > 0);
+			_q_result	= (unsigned long)( _value_aux / _div );
+			if(_q_result >= 1 || _f_digit || _div == 1)
+			{
+				_value_aux		= _value_aux - (_q_result * _div);
+				_f_digit	=	true;
+				_str[_char_p]	=	(char)( _q_result + 0x30 );
+				_char_p++;
+			}
+			_div = _div / 10;
+		} while (_div > 0);
+	else
+		_str[0]	= 0x30;
+		
+	_str[_char_p + 1]	=	0x00;
 }
 
 void float_to_string(float _value, char *_str)

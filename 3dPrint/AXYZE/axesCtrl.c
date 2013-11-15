@@ -30,6 +30,10 @@
 #include <asf.h>
 
 unsigned long	axeXcounter = 0, axeYcounter = 0, axeZcounter = 0, axeEcounter = 0;
+int stepX[4]	= {0x00, 0x40, 0xC0, 0x80};
+int stepY[4]	= {0x00, 0x10, 0x30, 0x20};
+int stepZ[4]	= {0x00, 0x80, 0xC0, 0x40};
+int stepE[4]	= {0x00, 0x80, 0xC0, 0x40};
 
 char axesWorkStart( AXES* absAXES, AXES* spAXES, float* exeSpeed, float* prevExeSpeed, char holdExtruder ) {
 	//	Total length of movement
@@ -50,23 +54,23 @@ char axesWorkStart( AXES* absAXES, AXES* spAXES, float* exeSpeed, float* prevExe
 	float axeYspeed		= fabs(deltaY) / printTime / 60.0;
 	float axeZspeed		= fabs(deltaZ) / printTime / 60.0;
 	float axeEspeed		= fabs(deltaE) / printTime / 60.0;
-	
+
 	//	convert mm/s to step/s
 	axeXspeed			= axeXspeed / STEP_MM;
-	axeYspeed			= axeXspeed / STEP_MM;
-	axeZspeed			= axeXspeed / STEP_MM;
-	axeEspeed			= axeXspeed / STEP_MM;
+	axeYspeed			= axeYspeed / STEP_MM;
+	axeZspeed			= axeZspeed / STEP_MM;
+	axeEspeed			= axeEspeed / STEP_MM;
 	
-	unsigned long axeXms = 0, axeYms = 0, axeZms = 0, axeEms = 0;
+	unsigned long axeXms = 0.0, axeYms = 0.0, axeZms = 0.0, axeEms = 0.0;
 	//	computing t per step ( * 1000 000 covert s to us )
 	if ( axeXspeed > 0.0 )
 		axeXms		= (long)(( 1000000 / axeXspeed ) );
 	if ( axeYspeed > 0.0 )
-		axeYms		= (long)(( 1.0 / axeYspeed * 1000.0 ) + 0.5 );
+		axeYms		= (long)(( 1000000 / axeYspeed ) );
 	if ( axeZspeed > 0.0 )
-		axeZms		= (long)(( 1.0 / axeZspeed * 1000.0 ) + 0.5 );
+		axeZms		= (long)(( 1000000 / axeZspeed ) );
 	if ( axeEspeed > 0.0 )
-		axeEms		= (long)(( 1.0 / axeEspeed * 1000.0 ) + 0.5 );
+		axeEms		= (long)(( 1000000 / axeEspeed ) );
 		
 	//	hold extruder
 	if ( holdExtruder )
@@ -77,6 +81,9 @@ char axesWorkStart( AXES* absAXES, AXES* spAXES, float* exeSpeed, float* prevExe
 	char axeZend = 0;
 	char axeEend = 0;
 	
+	axeXcounter = 0;
+	axeYcounter = 0;
+	
 	//	Timer configuration
 	TCC0_CTRLA		= 0x02;											//	Set clock prescaled CLK/2
 	TCC0_CTRLB		= 0x00;
@@ -84,12 +91,13 @@ char axesWorkStart( AXES* absAXES, AXES* spAXES, float* exeSpeed, float* prevExe
 	unsigned int timerTotal	= 0;
 	
 	//	Start movement of the 3 axes
-	while ( axeXend == 0/*|| !axeYend || !axeZend || !axeEend */) {
+	while ( axeXend == 0 || axeYend == 0 /*|| !axeZend || !axeEend */) {
 		
 		TCC0_CTRLFSET = 0x08;										//	Reset timer counter
 		unsigned int cycle = (unsigned int)( timerTotal * 0.0625 );		//	Computing cpuCycle
 	
 		axeXend		= axeXCtr( absAXES, &spAXES->axeX, &axeXms, &cycle );
+		axeYend		= axeYCtr( absAXES, &spAXES->axeY, &axeYms, &cycle );
 		
 		timerTotal = TCC0_CNT;
 	}	
@@ -100,8 +108,6 @@ char axesWorkStart( AXES* absAXES, AXES* spAXES, float* exeSpeed, float* prevExe
 
 char axeXCtr( AXES* absAXES, float* spAXE, unsigned long* msStep, unsigned int* cpuCycle ){
 	
-	int step[4] = {0x00, 0x80, 0xC0, 0x40};
-	
 	if ( *cpuCycle == 0 )
 		return 0;
 		
@@ -109,29 +115,67 @@ char axeXCtr( AXES* absAXES, float* spAXE, unsigned long* msStep, unsigned int* 
 	if ( ( absAXES->axeX - TOLL_MM ) <= *spAXE  && ( absAXES->axeX + TOLL_MM ) >= *spAXE )
 		return 1;
 		
-	char tmrEnd = delay_us( 1, msStep, &axeXcounter, *cpuCycle );
-	if ( !tmrEnd )
+	char tmrEnd = delay_us( 1, *msStep, &axeXcounter, *cpuCycle );
+	if ( tmrEnd == 0 )
 		return 0;
 		
 //	Run on FWD ( incremental movement )
-	if ( absAXES->axeX  < *spAXE - TOLL_MM ) {
+	if ( absAXES->axeX  < ( *spAXE - TOLL_MM ) ) {
 			axeXcStep++;
 			absAXES->axeX	+=	STEP_MM;
-			if ( axeXcStep > 4 )
+			if ( axeXcStep > 3 )
 				axeXcStep = 0;
 		}
 //	Run on REV ( decremental movement )
-	else if ( absAXES->axeX  > *spAXE + TOLL_MM ) {
+	else if ( absAXES->axeX  > ( *spAXE + TOLL_MM ) ) {
 		axeXcStep--;
 		absAXES->axeX	-=	STEP_MM;
 		if ( axeXcStep < 0 )
-			axeXcStep = 4;
+			axeXcStep = 3;
 	}
 	
-	PORTA_OUT = step[axeXcStep] | ( 0x08 & PORTA_OUT );
+	PORTA_OUT = stepX[axeXcStep] | ( 0x3F & PORTA_OUT );
 
 //	Reset counter
 	axeXcounter = 0;
 		
 	return 0;
 }
+
+char axeYCtr( AXES* absAXES, float* spAXE, unsigned long* msStep, unsigned int* cpuCycle ){
+	
+	if ( *cpuCycle == 0 )
+		return 0;
+		
+		//	Movement completed
+	if ( ( absAXES->axeY - TOLL_MM ) <= *spAXE  && ( absAXES->axeY + TOLL_MM ) >= *spAXE ) 		
+		return 1;
+		
+	char tmrEnd = delay_us( 1, *msStep, &axeYcounter, *cpuCycle );
+	if ( tmrEnd == 0 )
+		return 0;
+		
+//	Run on FWD ( incremental movement )
+	if ( absAXES->axeY  < ( *spAXE - TOLL_MM ) ) {
+			axeYcStep++;
+			absAXES->axeY	+=	STEP_MM;
+			if ( axeYcStep > 3 )
+				axeYcStep = 0;
+		}
+//	Run on REV ( decremental movement )
+	else if ( absAXES->axeY  > ( *spAXE + TOLL_MM ) ) {
+		axeYcStep--;
+		absAXES->axeY	-=	STEP_MM;
+		if ( axeYcStep < 0 )
+			axeYcStep = 3;
+	}
+	
+	PORTA_OUT = stepY[axeYcStep] | ( 0xCF & PORTA_OUT );
+
+//	Reset counter
+	axeYcounter = 0;
+		
+	return 0;
+}
+
+

@@ -30,8 +30,8 @@
 
 //#include "tmr.h"
 
-#define STEP_MM		0.01 // 1 step = 0.2 mm 
-#define TOLL_MM		0.01
+#define STEP_MM		0.1 // 1 step = 0.2 mm 
+#define TOLL_MM		0.12
 
 typedef struct {
 	float	axeX;
@@ -41,7 +41,7 @@ typedef struct {
 	} AXES;
 
 extern volatile AXES absAxeAxtualPos;
-extern volatile int axeXcStep;
+extern volatile int axeXcStep;	
 extern volatile int axeYcStep;
 extern volatile int axeZcStep;
 extern volatile int axeEcStep;
@@ -50,11 +50,14 @@ char extrudeStart ( AXES* absAXES, float* spPos, float* exeSpeed, float* prevExe
 
 
 /**********************************************************************************/
+/*																				  */
 /*  axesWorkStart start axes movement										      */
 /*  absAXES      -- absolute AXES position (deprecated, extern volatile to use)   */
 /*	spAXES       -- set point position        									  */
-/*	exeSpeed     -- movement speed, XYZE are interpolated for axes syn            */
+/*	exeSpeed     -- movement speed, XYZE are interpolated for axes syn			  */
+/*	prevExeSpeed -- NOT used											          */
 /*  holdExtruder -- no movement for extruder/ extruder locked                     */
+/*																				  */
 /**********************************************************************************/
 char axesWorkStart ( AXES* absAXES, AXES* spAXES, float* exeSpeed, float* prevExeSpeed, char holdExtruder );
 

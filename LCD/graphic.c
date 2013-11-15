@@ -31,7 +31,7 @@ void write_txt(char *_text, int _x_pos, int _y_pos, char invert)
 			lcd_send_data(data);
 		}
 		i++;
-	} while ((*(++_text)) && i < 21);
+	} while ((*(++_text) != 0x00 ) && i < 21);
 }
 
 void write_txt_append(char *_text, int _y_pos)

@@ -58,7 +58,7 @@ int main (void)
 	write_logo_fs(load_logo);
 	_delay_ms(1000);
 	
-	PORTA_DIR |= 0xC0;
+	PORTA_DIR |= 0xF0;
 //	SD CARD INITIALIZATION
 	initSPI();						//	Init SPI interface
 	while( 1 ) {				//	Re-try SD card init
@@ -406,10 +406,12 @@ void gCodeFile( DIR* file ) {
 			lcd_cleaning();
 		}
 		else if ( pulse( !(PORTF_IN & 0x04) , &mSw2) ) {
+				retVal	= 0;
 				while ( retVal != EOF ) {
 					retVal = EXT_readfile( &fHNDL, &line);
 					write_txt(&line, 0, 3, 0);
 					printFromString(&line);
+					write_txt(&line, 0, 2, 0);
 				}
 				write_txt("Fine stampa", 0, 3, 0);
 		}		
