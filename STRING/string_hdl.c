@@ -5,8 +5,9 @@
  *  Author: winShit
  */ 
 
-#include <asf.h>
+//#include <asf.h>
 
+#define NULL 0
 void NULL_char(char *_str, int _len)
 {
 	for (int i = 0; i < _len; i++)

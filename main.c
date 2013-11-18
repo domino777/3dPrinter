@@ -9,7 +9,11 @@
  * Include header files for all drivers that have been imported from
  * Atmel Software Framework (ASF).
  */
-#include <asf.h>
+
+#define CPU_CLOCK	32000000;
+
+//#include "asf.h"
+#include <avr/io.h>
 #include "uBoard.h"
 #include "sys_clock.h"
 #include "LCD/LCDCtrl/lcd_monochrome.h"
@@ -19,9 +23,13 @@
 #include "SPI/uSPI.h"
 #include <avr/delay.h>
 #include "EXT2/EXT2.h"
-#include "SDMCC/SDMMC.h"
+#include "SDMMC/SDMMC.h"
 #include "domy_logos.h"
 #include "3dPrint/_3dPrint.h"
+
+
+#define true	1
+#define false	0
 
 volatile unsigned char buffer[1024];
 volatile float	prevF;
@@ -33,13 +41,13 @@ volatile int axeEcStep;
 
 
 void gCodeFile( DIR* file );
-void readFile (DIR* file );
-bool pulse( bool pb, bool* vmem);
+void readFile( DIR* file );
+char pulse( char pb, char* vmem);
 	
-bool mSw2		= 0;
-bool mSw1		= 0;
+char mSw2		= 0;
+char mSw1		= 0;
 	
-int main (void)
+int main()
 {
 	
 //	SYSTEM INITIALIZATION
@@ -55,7 +63,7 @@ int main (void)
 	lcd_cleaning();					//	screen cleaning
 	lcd_back_light(true);			//	Switch on back light
 
-	write_logo_fs(load_logo);
+	//write_logo_fs(load_logo);
 	_delay_ms(1000);
 	
 	PORTA_DIR |= 0xF0;
@@ -106,7 +114,7 @@ int main (void)
 	dirHNDL.dir_entry_byte			= 0;
 	dirHNDL.last_inode_block_index	= 0;
 	
-	bool pVal		= 0;
+	char pVal		= 0;
 	int entrySel	= 0;
 	
 	int	i			= 0;
@@ -163,7 +171,7 @@ int main (void)
 	int i = 0;
 	int datas = 0;
 	int counter = 0;
-	bool bit;;
+	char bit;;
 	int crc_val;
 	int retVal = 0;
 	//crc_val = getCRC(values);
@@ -327,10 +335,10 @@ int main (void)
 	unsigned long int counterOn;
 	unsigned long int counterOff;
 	int i=0;
-	bool dnOn = false;
-	bool dnOff = false;
+	char dnOn = false;
+	char dnOff = false;
 	int step[4] = {0x00, 0x80, 0xC0, 0x40};
-	bool app = false;
+	char app = false;
 	PORTA_DIR |= 0xC0 | LCD_RESET_PIN_bm;
 	int steps = 0;
 	while(true){
@@ -445,7 +453,7 @@ void readFile ( DIR* file ) {
 	}
 }
 
-bool pulse( bool pb, bool* vmem) {
+char pulse( char pb, char* vmem) {
 	_delay_ms(50);
 	if ( pb && !*vmem ) {
 		*vmem	= true;

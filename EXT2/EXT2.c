@@ -24,12 +24,10 @@
  *       
  */ 
 
-#include "SDMCC/SDMMC.h"
 #include "EXT2.h"
-#include "STRING/string_hdl.h"
 
-#include "LCD/graphic.h"
-#include "PARSER/parsing.h"
+#include "SDMMC/SDMMC.h"
+#include "STRING/string_hdl.h"
 
 char* readInode( unsigned long inodeId );
 

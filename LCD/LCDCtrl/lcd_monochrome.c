@@ -6,10 +6,12 @@
  */ 
 
 #include "lcd_monochrome.h"
-
 #include <avr/delay.h>
-#include <asf.h>
+#include <avr/io.h>
+//#include <asf.h>
 
+#define false	0
+#define true	1
 void lcd_usart_spi_port_init()
 {
 	
@@ -45,7 +47,7 @@ void lcd_usart_spi_port_init()
 	USARTD0_CTRLB		= USART_TXEN_bm | 0x04;
 }
 
-void lcd_send_cmd(Byte _data)
+void lcd_send_cmd(char _data)
 {
 	PORTF_OUT	&= ~LCD_CS_PIN_bm;						//CS Selected
 	PORTD_OUT	&= ~LCD_A0_PIN_bm;						//A0 command transmit selection
@@ -58,7 +60,7 @@ void lcd_send_cmd(Byte _data)
 	PORTF_OUT		|=  LCD_CS_PIN_bm;						//CS De-Selected
 }
 
-void lcd_send_data(Byte _data)
+void lcd_send_data(char _data)
 {
 	PORTF_OUT	&= ~LCD_CS_PIN_bm;						//CS Selected
 	PORTD_OUT	|= LCD_A0_PIN_bm;						//A0 data transmit selection
@@ -97,13 +99,13 @@ void lcd_init()
 	
 }
 
-void lcd_select_column(Byte _page)
+void lcd_select_column(char _page)
 {
 	lcd_send_cmd(ST7565R_CMD_COLUMN_ADDRESS_SET_MSB| (_page >> 4));
 	lcd_send_cmd(ST7565R_CMD_COLUMN_ADDRESS_SET_LSB| (0x0F & _page));
 }
 
-void lcd_select_page(Byte _page)
+void lcd_select_page(char _page)
 {
 	lcd_send_cmd(ST7565R_CMD_PAGE_ADDRESS_SET|_page);
 }
@@ -121,7 +123,7 @@ void lcd_cleaning()
 	}
 }
 
-void lcd_back_light(Bool flag)
+void lcd_back_light(char flag)
 {
 	if (flag)
 	PORTE_OUT |= LCD_BCKLGHT_PIN_bm;	//LCD Back light ON

@@ -13,6 +13,7 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
+#include <avr/io.h>
 
 void board_clearing()
 {

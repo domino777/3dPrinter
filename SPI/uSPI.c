@@ -5,8 +5,9 @@
  *  Author: winShit
  */ 
 
-#include <asf.h>
-#include "uSPI.h";
+//#include <asf.h>
+#include <avr/io.h>
+#include "uSPI.h"
 
 void initSPI()
 {

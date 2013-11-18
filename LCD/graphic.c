@@ -10,7 +10,7 @@
 
 #include "general_bmp.h"
 
-#include <asf.h>
+#include <avr/io.h>
 #include <avr/delay.h>
 
 void write_txt(char *_text, int _x_pos, int _y_pos, char invert)

@@ -27,7 +27,7 @@
 #include "axesCtrl.h"
 #include "tmr.h"
 #include <math.h>
-#include <asf.h>
+#include <avr/io.h>
 
 unsigned long	axeXcounter = 0, axeYcounter = 0, axeZcounter = 0, axeEcounter = 0;
 int stepX[4]	= {0x00, 0x40, 0xC0, 0x80};
