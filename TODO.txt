@@ -1,0 +1,7 @@
+axeCtrl.h - axeCtrl.c
+
+	[ ] axe(XYZ)Ctrl function - reduce to one oly
+	[ ] implementation of speed acceleration
+
+all
+	[v] work in progress

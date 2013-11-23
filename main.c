@@ -50,12 +50,14 @@
 #define true	1
 #define false	0
 
-volatile unsigned char buffer[1024];
-volatile float	prevF;
-volatile AXES absAxeAxtualPos;
-volatile int axeXcStep;
-volatile int axeYcStep;
-volatile int axeZcStep;
+//	GLOBAL ABSOLUTE VARIABLE
+
+volatile unsigned char buffer[1024];		//	buffer used by SDMMC.h
+
+volatile AXES absAxeAxtualPos;				//	absolute axes position - _3dPrint.h
+volatile int axeXcStep;						//	actual index step motor - axe X - _3dPrint.h
+volatile int axeYcStep;		
+volatile int axeZcStep;						
 volatile int axeEcStep;
 
 
@@ -73,22 +75,23 @@ int main()
 	board_clearing();
 	cpu_reset();
 	
-//	CLOCK INITIALIZATION
+//	MCU CLOCK INITIALIZATION
 	sys_clock();
 	
 //	LCD INITIALIZATION
 	lcd_usart_spi_port_init();
 	lcd_init();
-	lcd_cleaning();					//	screen cleaning
-	lcd_back_light(true);			//	Switch on back light
+	lcd_cleaning();												//	screen cleaning
+	lcd_back_light(true);										//	Switch on back light
 
 	//write_logo_fs(load_logo);
 	_delay_ms(1000);
 	
 	PORTA_DIR |= 0xF0;
 //	SD CARD INITIALIZATION
-	initSPI();						//	Init SPI interface
-	while( 1 ) {				//	Re-try SD card init
+	initSPI();													//	Init SPI interface
+	
+	while( 1 ) {												//	Try_Re-try SD card init
 		int retVal		= initSD();
 		lcd_cleaning();
 		while( retVal ) {
@@ -99,9 +102,9 @@ int main()
 				retVal	= initSD();
 			}
 		}		
-		
+
 		write_txt("EXT2 fs mounting", 0, 1, 0);
-		retVal		= EXT_mount();
+		retVal		= EXT_mount();								//	Try to mount SD card file system
 		lcd_cleaning();
 		if ( retVal != 0 ) {
 			if ( retVal == 0x01 )
@@ -136,43 +139,49 @@ int main()
 	char pVal		= 0;
 	int entrySel	= 0;
 	
-	int	i			= 0;
-	//	getting first dir entry
+	int	i 			= 0;
+	//	getting the first 4 dir entry
 	while (i < 4 && (dirContent[i] = EXT_ls(selDir, &dirHNDL)).inode_id != 0)
 		i++;
 		
 	lcd_cleaning();
-	
+
+/*
+ *	MAIN CYCLE SYSTEM 
+ *	
+ *	reading dir, print dir entry, file selection, 3D print, read file 
+ */
 	while( 1 ){
 		
 //	Write entry on display
 		for ( int p = 0; p < 4 && dirContent[p].inode_id != 0; p++) {
 			write_txt(dirContent[p].inode_name, 0, p, entrySel == p);
 			if ( dirContent[p].inode_type == EXT2_FT_DIR )
-				write_txt("d", 20, p, 0);
-			else if ( dirContent[p].inode_type == EXT2_FT_REG_FILE )
+				write_txt("d", 20, p, 0);															//	d flag - directory
+			else if ( dirContent[p].inode_type == EXT2_FT_REG_FILE )								//	f flag - regular file
 				write_txt("f", 20, p, 0);
 		}		
 		
 //	SW1 rise edge detect
 		if ( pulse ( !(PORTF_IN & 0x02), &mSw1 ) )
 			entrySel++;
-
+			
+//	Diplay row highlight and gettting next 4 dir's entries
 		if ( entrySel > 3 || entrySel > i - 1) {		
-			i			= 0;
+			i = 0;
 			while ( i < 4 && (dirContent[i] = EXT_ls(selDir, &dirHNDL)).inode_id != 0)
 				i++;
-			entrySel	= 0;
+			entrySel = 0;
 			lcd_cleaning();
 		}		
 		
-//	dir handler clearing when eof is reached AND SW1 rise edge detect
-		if (dirContent[entrySel].inode_id == 0 || ( pVal = pulse( !(PORTF_IN & 0x04), &mSw2 )) ) {		
-			if ( dirContent[entrySel].inode_type == EXT2_FT_DIR && pVal) 
-				selDir						= dirContent[entrySel];			
+//	dir handler clearing when EOF is reached AND SW1 rise edge detect
+		if ( dirContent[entrySel].inode_id == 0 || ( pVal = pulse( !(PORTF_IN & 0x04), &mSw2 )) ) {		
+			if ( dirContent[entrySel].inode_type == EXT2_FT_DIR && pVal ) 
+				selDir	= dirContent[entrySel];			
 					
-			else if (dirContent[entrySel].inode_type == EXT2_FT_REG_FILE && pVal )
-				gCodeFile(&dirContent[entrySel]);	
+			else if ( dirContent[entrySel].inode_type == EXT2_FT_REG_FILE && pVal )
+				gCodeFile( &dirContent[entrySel] );													//	Call function from main.c for read or print a gCode file - file extensione isn't checked
 				
 			dirHNDL.dir_entry_byte			= 0;
 			dirHNDL.last_inode_block_index	= 0;
@@ -416,6 +425,14 @@ int main()
 	*/
 }
 
+
+/*
+ *	gCodeFile
+ *	expect DIR type variable as argument
+ * 
+ * 	selection menu is show in lcd display
+ * 	Read or 3DPrint
+ */
 void gCodeFile( DIR* file ) {
 	char retVal;
 	char line[128];
@@ -429,13 +446,13 @@ void gCodeFile( DIR* file ) {
 		write_txt("SW1 - Read", 0, 1, 0);
 		write_txt("SW2 - 3DPrint", 0, 2, 0);
 		if ( pulse( !(PORTF_IN & 0x02) , &mSw1) ){
-			readFile(&*file);
+			readFile( &*file );									//	Call readFile function from main.c
 			lcd_cleaning();
 		}
 		else if ( pulse( !(PORTF_IN & 0x04) , &mSw2) ) {
 				retVal	= 0;
 				while ( retVal != EOF ) {
-					retVal = EXT_readfile( &fHNDL, &line);
+					retVal = EXT_readfile( &fHNDL, &line );
 					write_txt(&line, 0, 3, 0);
 					printFromString(&line);
 					write_txt(&line, 0, 2, 0);
@@ -445,16 +462,24 @@ void gCodeFile( DIR* file ) {
 	}
 }
 
+/*
+ *	readFile
+ *	expect DIR type variable as argument
+ * 
+ *	read the content of a given file
+ */
+ 
 void readFile ( DIR* file ) {
 	char retVal;
 	char line[128]; 
 	
 	FILE_HNDL	fHNDL;
-	fHNDL.inode_id	=	file->inode_id;
+	fHNDL.inode_id	=	file->inode_id;							//	Extract file's inide_id
 	fHNDL.last_byte =	0;
 	
 	lcd_cleaning();
-	write_txt("SW1 - Next page", 0, 0, 0);
+	write_txt("Use push button", 0, 0, 0);
+	write_txt("SW1 for next page", 0, 1, 0);
 	
 	while ( 1 ){
 		if ( pulse( !(PORTF_IN & 0x02) , &mSw1) ){
@@ -464,14 +489,26 @@ void readFile ( DIR* file ) {
 				write_txt(line, 0, i, 0);
 			}		
 		}			
-		if ( retVal == EOF ) {
+		if ( retVal == EOF )
 			write_txt("## EndOfFile ##", 0, 3, 0);
-			if ( pulse( !(PORTF_IN & 0x04 ) , &mSw2))
+			
+		if ( pulse( !(PORTF_IN & 0x04 ) , &mSw2))			//	Exit from file when SW2 is pressed											
 				break;
-		}
 	}
 }
 
+
+/*
+ *	pulse
+ * 	pb		-- pushbutton status
+ * 	vmem	-- pushbutton memory
+ * 
+ * 	pointer passed to pulse must be an unique variable for each push button and not cleared in the same loop call
+ *	
+ *	function return true when a rise edge of pb is detected and it stay true for one and only one cpu cylce
+ * 
+ */
+ 
 char pulse( char pb, char* vmem) {
 	_delay_ms(50);
 	if ( pb && !*vmem ) {
