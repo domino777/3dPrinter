@@ -20,7 +20,7 @@
  *
  *       @author         : Mauro Ghedin
  *       @contact        : domyno88 at gmail dot com
- *       @version        : 0.1
+ *       @version        : 0.2
  *       
  */ 
 
@@ -28,11 +28,12 @@
 #ifndef AXESCTRL_H_
 #define AXESCTRL_H_
 
-//#include "tmr.h"
+//	DEFINE SECTION
 
-#define STEP_MM		0.1 // 1 step = 0.2 mm 
-#define TOLL_MM		0.12
+#define STEP_MM		0.1 			// mm per motor step
+#define TOLL_MM		0.12			// Position tollerance
 
+//	AXES struct type definition
 typedef struct {
 	float	axeX;
 	float	axeY;
@@ -40,6 +41,7 @@ typedef struct {
 	float	axeE;
 	} AXES;
 
+//	external global varible
 extern volatile AXES absAxeAxtualPos;
 extern volatile int axeXcStep;	
 extern volatile int axeYcStep;
@@ -49,18 +51,37 @@ extern volatile int axeEcStep;
 char extrudeStart ( AXES* absAXES, float* spPos, float* exeSpeed, float* prevExeSpeed );
 
 
-/**********************************************************************************/
-/*																				  */
-/*  axesWorkStart start axes movement										      */
-/*  absAXES      -- absolute AXES position (deprecated, extern volatile to use)   */
-/*	spAXES       -- set point position        									  */
-/*	exeSpeed     -- movement speed, XYZE are interpolated for axes syn			  */
-/*	prevExeSpeed -- NOT used											          */
-/*  holdExtruder -- no movement for extruder/ extruder locked                     */
-/*																				  */
-/**********************************************************************************/
-char axesWorkStart ( AXES* absAXES, AXES* spAXES, float* exeSpeed, float* prevExeSpeed, char holdExtruder );
+/*
+*
+*	axesWorkStart start axes movement
+*	absAXES      -- absolute AXES position (deprecated, extern volatile to use)
+*	spAXES       -- set point position
+*	exeSpeed     -- movement speed, XYZE are interpolated for axes syn
+*	prevExeSpeed -- NOT used
+*	holdExtruder -- no movement for extruder/ extruder locked
+*
+*/
+char axesWorkStart ( AXES* absAXES, AXES* spAXES, float* exeSpeed, char holdExtruder );
 
+
+/*
+*
+*	extruderFwdRev extruced move fwd/rev by given length
+*	fwdRev		 -- 0 = extruder FWD | 1 = extruder REV
+*	mmRetract    -- set point length
+*
+*/
+char extruderFwdRev ( unsigned char fwdRev, float mmRetract );
+
+
+/*
+*
+*	axeXXXCtrl	axes low level control ( internally used )
+*	absAXEA		 -- absolute axes potion
+*	spAXE		 -- axe setpint position ( mm )
+*	msStrp		 -- ms per step
+* 	cpuCycle	 -- cpu cycle time in uS
+*/
 char axeXCtr ( AXES* absAXES, float* spAXE, unsigned long* msStep, unsigned int* cpuCycle );
 char axeYCtr ( AXES* absAXES, float* spAXE, unsigned long* msStep, unsigned int* cpuCycle );
 char axeZCtr ( AXES* absAXES, float* spAXE, unsigned long* msStep, unsigned int* cpuCycle );

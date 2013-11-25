@@ -28,6 +28,9 @@
 #include "3dPrint/GCODE/g-code.h"
 #include "3dPrint/AXYZE/axesCtrl.h"
 
+//	DEFINE SECTION
+
+#define	_RETRACT_EXTR_MM	10.0					//	Length of plastic wire to retract from extruder
 
 char printFromString( char* strCmd ) {
 
@@ -36,27 +39,27 @@ char printFromString( char* strCmd ) {
 
 	GCODE_PARSED gCodeVar;
 	AXES		 spAxes;
-		
+
+//	Parsing G-Code		
 	gCodeVar	= gCode_parsing( strCmd );	
 	
+//	Saving parameter to local temp structured variables
 	spAxes.axeX	=	gCodeVar.valX;
 	spAxes.axeY	=	gCodeVar.valY;
 	spAxes.axeZ	=	gCodeVar.valZ;
 	spAxes.axeE	=	gCodeVar.valE;
 
 	
-	if ( gCodeVar.cmdType == 'G' ) {
-		if ( gCodeVar.cmdVal == 1 ) {
-		//	if ( gCodeVar.valE != 0.0 && gCodeVar.valX != 0.0 && gCodeVar.valY != 0.0 && gCodeVar.valZ != 0.0 )
-				//extrudeStart( &absAxeAxtualPos, &gCodeVar.valE, &prevF, &prevF );
-				//;
-			//else {
-				axesWorkStart( &absAxeAxtualPos, &spAxes, &gCodeVar.valF, &prevF, ( gCodeVar.valE == 0.0 ) );
-		}	
-	}	
-	//	update previous speed parameter		
-	if ( gCodeVar.valF != 0.0 && gCodeVar.valF != prevF )
-		 prevF = gCodeVar.valF;
-		 
-	return 0x01;		//	command string completed
+	if ( gCodeVar.cmdType == 'G' )					//	Action G command
+		if ( gCodeVar.cmdVal == 1 )					//	Movement command
+			axesWorkStart( &absAxeAxtualPos, &spAxes, &gCodeVar.valF, ( gCodeVar.valE == 0.0 ) );
+		
+	if ( gCodeVar.cmdType == 'M' ) {				//	Action M command
+		if ( gCodeVar.cmdVal == 103 )				//	Retract extruder code
+			extruderFwdRev ( 1, _RETRACT_EXTR_MM );
+		else if ( gCodeVar.cmdVal == 101 )			//	Restore retracted wire
+			extruderFwdRev ( 0, _RETRACT_EXTR_MM );
+	}
+
+	return 0x01;									//	command string completed
 }

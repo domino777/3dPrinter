@@ -30,7 +30,7 @@
 
 #include "AXYZE/axesCtrl.h"
 
-extern volatile float	prevF;
+extern volatile unsigned char extruderCmd_FwdRev;
 
 char	printFromString( char* strCmd);
 
