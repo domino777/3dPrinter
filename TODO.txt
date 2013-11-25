@@ -5,3 +5,17 @@ axeCtrl.h - axeCtrl.c
 
 all
 	[v] work in progress
+	[ ] implementation of temperature control
+	[ ] re-write graphic library
+	[ ] re-write parsing library
+	[ ] re-design FILE e DIR handler
+	[ ] implementation of EXT2 code for fs check
+	[ ] add write mode on ext2fs library
+	[ ] add codes number on g-code parser - 1st g-code parser library need to be redeveloped and optimized for speed
+	[ ] re-design graphical user interface
+	[ ] source code/code re-organization
+
+TODO for not-avr-dependency
+	[ ] IO #define
+	[ ] delay_library
+	[ ] interupt handling (not used yet)
