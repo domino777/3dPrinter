@@ -32,6 +32,7 @@
 
 void	byte8_to_string(unsigned int _value, char *_str);
 void	long_to_string (unsigned long _value, char *str);
+void	long_to_string_n (unsigned long _value, char *str);
 void	float_to_string (float _value, char *str);
 long	string_to_long(char *str);
 int		string_to_int(char *str);
