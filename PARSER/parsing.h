@@ -20,7 +20,7 @@
  *
  *       @author         : Mauro Ghedin
  *       @contact        : domyno88 at gmail dot com
- *       @version        : 0.1
+ *       @version        : 0.2
  *
  */
 
@@ -28,14 +28,20 @@
 #ifndef PARSING_H_
 #define PARSING_H_
 
-//#include <asf.h>
+void	byte8_to_string	(unsigned int _value, char* _str);
 
-void	byte8_to_string(unsigned int _value, char *_str);
-void	long_to_string (unsigned long _value, char *str);
-void	long_to_string_n (unsigned long _value, char *str);
-void	float_to_string (float _value, char *str);
-long	string_to_long(char *str);
-int		string_to_int(char *str);
-float	string_to_float(char *str);
+/*	
+ *	void	long_to_string	(unsigned long* _value, char* str)
+ *	convert an unsigned long number to an array of char.
+ * 
+ *	NOTE: the lenght of the array, passed as pointer ( * str ) to the function, must be equal or
+ *	greater to the literal lenght of the number ( _value )
+ */
+void	long_to_string	(unsigned long* _value, char* str);
+void	float_to_string (float _value, char* str);
+
+long	string_to_long(char* str);
+int		string_to_int(char* str);
+float	string_to_float(char* str);
 
 #endif /* PARSING_H_ */

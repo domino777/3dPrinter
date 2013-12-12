@@ -30,6 +30,8 @@
 #define true	1
 #define false	0
 
+#define ASCII_CONST	0x30;
+
 void char8_to_string(unsigned int _value, char *_str)
 {
 	char	_f_digit	= false;
@@ -55,57 +57,31 @@ void char8_to_string(unsigned int _value, char *_str)
 	_str[_char_p] = 0x00;
 }
 
-void long_to_string(unsigned long _value, char *_str)
-{
-	char	_f_digit	= false;
-	char	_char_p		= 0;
-	unsigned long		_div		= 10000000000;
-	unsigned long		_value_aux	= 0;
-	unsigned long		_q_result	= 0;
-	
-	_value_aux	=	_value;
-	
-	if ( _value != 0 )
-		do
-		{
-			_q_result	= (unsigned long)( _value_aux / _div );
-			if(_q_result >= 1 || _f_digit || _div == 1)
-			{
-				_value_aux		= _value_aux - (_q_result * _div);
-				_f_digit	=	true;
-				_str[_char_p]	=	(char)( _q_result + 0x30 );
-				_char_p++;
-			}
-			_div = _div / 10;
-		} while (_div > 0);
-	else
-		_str[0]	= 0x30;
-		
-	_str[_char_p + 1]	=	0x00;
-}
-
-/*	--------------------------------------------------------------------
- * 
- *	NEW CODE
- * 
+/*	
+ *	Convert an unsigned long no to an array of chars
  */
  
-void long_to_string_n(unsigned long _value, char *_str) {
+void long_to_string(unsigned long* _value, char* _str) {
 	
-	unsigned long value_aux	= _value;
+	unsigned long value_aux	= *_value;
 	char count	= 0;
 	
 	while ( value_aux ) {
-			*( _str	+ count)	= (char)( ( value_aux % 10 ) + 0x30 );
+			*( _str	+ count)	= (char)( ( value_aux % 10 ) + ASCII_CONST );
 			value_aux			= value_aux / 10;
 			count++;
 	}
 	
 	*( _str + count )	= 0x00;
 	
-	if ( !count )
+	//	Skip-out if value is zero
+	if ( !count ) {
+		*( _str + count )		= 0x00 + ASCII_CONST;
+		*( _str + count + 1 )	= 0x00;
 		return;
-		
+	}
+	
+	//	Array order swapping
 	char swap;
 	for( int i = 0; i < count/2; i++) {
 		swap				= *( _str + count - i );
@@ -113,8 +89,6 @@ void long_to_string_n(unsigned long _value, char *_str) {
 		*( _str + i )		= swap;
 	}
 }
-
-/*	------------------------------------------------------------------  */
 
 void float_to_string(float _value, char *_str)
 {
