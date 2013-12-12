@@ -20,7 +20,7 @@
  *
  *       @author         : Mauro Ghedin
  *       @contact        : domyno88 at gmail dot com
- *       @version        : 0.1
+ *       @version        : 0.2
  *
  */
 
@@ -29,6 +29,7 @@
 #define NULL	0
 #define true	1
 #define false	0
+
 void char8_to_string(unsigned int _value, char *_str)
 {
 	char	_f_digit	= false;
@@ -83,6 +84,38 @@ void long_to_string(unsigned long _value, char *_str)
 	_str[_char_p + 1]	=	0x00;
 }
 
+/*	--------------------------------------------------------------------
+ * 
+ *	NEW CODE
+ * 
+ */
+ 
+void long_to_string_n(unsigned long _value, char *_str) {
+	
+	unsigned long value_aux	= _value;
+	char count	= 0;
+	
+	while ( value_aux ) {
+			*( _str	+ count)	= (char)( ( value_aux % 10 ) + 0x30 );
+			value_aux			= value_aux / 10;
+			count++;
+	}
+	
+	*( _str + count )	= 0x00;
+	
+	if ( !count )
+		return;
+		
+	char swap;
+	for( int i = 0; i < count/2; i++) {
+		swap				= *( _str + count - i );
+		*( _str + count )	= *( _str + i );
+		*( _str + i )		= swap;
+	}
+}
+
+/*	------------------------------------------------------------------  */
+
 void float_to_string(float _value, char *_str)
 {
 	char	_f_digit	= false;
@@ -124,6 +157,7 @@ int string_to_int(char *str)
 	valOut = invert == 0 ? valOut : ( valOut ^ 0xFFFF ) + 1;
 	return valOut;
 }
+
 
 long string_to_long(char *str)
 {
