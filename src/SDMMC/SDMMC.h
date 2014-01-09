@@ -1,5 +1,5 @@
 /*
- *	parsing.h
+ *	SDMMC.h
  *
  *  "Copyright 2013 Mauro Ghedin"
  *
@@ -25,16 +25,28 @@
  */
 
 
-#ifndef PARSING_H_
-#define PARSING_H_
+#ifndef SDMMC_H_
+#define SDMMC_H_
 
-//#include <asf.h>
+#define OFF					0
+#define ON					1
+#define CRC_ON_OFF			59
+#define SET_BLOCKLEN 		16	
+#define SD_RESET			0
+#define SD_INIT_REQ			1
+#define READ_SINGLE_BLOCK	17
+#define SEND_CSD			9
+#define APP_CMD				55
+#define ASD_INIT_REQ		41
+#define SD_V_CHECK			8
 
-void	byte8_to_string(unsigned int _value, char *_str);
-void	long_to_string (unsigned long _value, char *str);
-void	float_to_string (float _value, char *str);
-long	string_to_long(char *str);
-int		string_to_int(char *str);
-float	string_to_float(char *str);
+#define BLOCK_SIZE			512
 
-#endif /* PARSING_H_ */
+int sendCmdSD(unsigned char cmd, long int arg, unsigned char CRCval);
+int initSD();
+int readBlockSD(unsigned long blkStart);
+int vCheckSD();
+
+extern volatile unsigned char buffer[1024];
+
+#endif /* SDMMC_H_ */
